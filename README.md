@@ -2,6 +2,8 @@
 
 An edge-to-cloud pipeline for live Aedes surveillance, using a Raspberry Pi for streaming and a cloud server for YOLOv11 inference.
 
+![MAST-CloudNet Interface](./assets/interface.jpg "MAST-CloudNet User Interface")
+
 ## Overview
 
 MAST-CloudNet is a distributed system designed for real-time mosquito surveillance, specifically targeting Aedes species. The project implements an edge-to-cloud architecture that combines:
