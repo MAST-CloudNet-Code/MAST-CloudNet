@@ -2,7 +2,9 @@
 
 An edge-to-cloud pipeline for live Aedes surveillance, using a Raspberry Pi for streaming and a cloud server for YOLOv11 inference.
 
-![MAST-CloudNet Interface](./assets/interface.jpg "MAST-CloudNet User Interface")
+<div align="center">
+  <img src="./assets/interface.jpg" alt="MAST-CloudNet User Interface" width="150"/>
+</div>
 
 ## Overview
 
