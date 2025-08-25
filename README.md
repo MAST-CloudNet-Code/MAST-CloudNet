@@ -45,10 +45,10 @@ The system follows a two-tier architecture:
 - Network connectivity for streaming
 
 ### Edge Requirements
-- Raspberry Pi 4 (4GB+ RAM recommended)
+- Raspberry Pi (Model 3B+, 4, 5, or Zero 2 W recommended).
 - Compatible camera module
 - Stable network connection
-- MicroSD card (32GB+)
+- MicroSD card (32GB+ recommended)
 
 ## Server Setup
 
@@ -188,19 +188,63 @@ The web dashboard provides:
 - `POST /reset_count`: Reset detection counters
 - `GET /export_counts`: Export detection data as CSV
 
-## File Structure
 
+## Setup Raspberry Pi Streaming Client (Edge Layer)
+
+A robust, multi-threaded Python script designed to stream video from a Raspberry Pi (or any other machine with a camera) to a central server over the network. This client is optimized for long-running, unattended operation, making it ideal for MAST-CloudNet's *Aedes* surveillance.
+
+### Installation (Raspberry Pi)
+
+1.  **Access your Raspberry Pi's Terminal**
+
+
+2.  **Enable the Camera (if using a Pi Camera Module)**
+    ```bash
+    sudo raspi-config
+    ```
+    Navigate to `Interface Options` -> `Legacy Camera` -> `Yes`, then save and reboot.
+
+
+3.  **Clone the Repository & setup a Python virtual environment**
+    Follow the instructions from the [server section of this guide](#clone-repository) 
+
+
+5.  **Install Dependencies**
+    Create a `requirements.txt` file with the following content:
+    ```
+    opencv-python-headless
+    requests
+    ```
+    Then, install the requirements:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+---
+
+## Run the script
+
+The script is configured via command-line arguments.
+
+| Argument          | Description                                                    | Default                  |
+| ----------------- | -------------------------------------------------------------- | ------------------------ |
+| `--camera`        | Camera index (`0`, `1`...)                                     | `0`                      |
+| `--image`         | Path to a static image file for testing the script             | `None`                   |
+| `--server`        | Full URL of the server's receiving endpoint.                   | `http://localhost:5000`  |
+| `--fps`           | The maximum frames per second to capture.                      | `15`                     |
+| `--retry`         | Seconds to wait between connection retry attempts.             | `5`                      |
+| `--no-verify-ssl` | Disable SSL certificate verification for HTTPS connections.    | `False`                  |
+
+
+Make sure your virtual environment is active (`source venv/bin/activate`).
+```bash
+# Stream from the default Pi Camera to a server at 192.168.1.100
+python edge_stream.py --camera 0 --server [http://192.168.1.100:5000](http://192.168.1.100:5000) --fps 20
 ```
-MAST-CloudNet/
-├── app.py                 # Main Flask application
-├── templates/
-│   └── index.html        # Web dashboard template
-├── models/
-│   └── best.pt          # YOLOv11 trained model (user provided)
-├── server.log           # Application logs
-├── experiment_log.txt   # Experiment tracking
-└── README.md           # This file
-```
+
+## Run as a Systemd Service (Recommended)
+To ensure the client runs automatically on boot and restarts if it fails, [set it up as a systemd service](#using-systemd-service).
+
 
 ## Troubleshooting
 
@@ -215,7 +259,7 @@ MAST-CloudNet/
 
 - Application logs: `server.log`
 - Experiment logs: `experiment_log.txt`
-- System logs: `journalctl -u mast-cloudnet.service -f` (if using systemd)
+- System logs: `journalctl -u mast-cloudnet.service -f`
 
 ## Contact
 
