@@ -51,8 +51,8 @@ latest_frame = None
 latest_count = {cls: 0 for cls in CLASSES_OF_INTEREST}
 lock = threading.Lock()
 
-frame_queue = queue.Queue(maxsize=30)
-frame_buffer = deque(maxlen=15)
+frame_queue = queue.Queue(maxsize=5)
+frame_buffer = deque(maxlen=5)
 
 NMS_THRESHOLD = 1
 CONFIDENCE_THRESHOLD = 0.6
@@ -392,7 +392,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Mosquito Detection Server")
     parser.add_argument("--port", type=int, default=5000,
                         help="Port to run the web server on")
-    parser.add_argument("--workers", type=int, default=1,
+    parser.add_argument("--workers", type=int, default=4,
                         help="Number of worker threads to process frames")
 
     return parser.parse_args()
