@@ -1,272 +1,264 @@
 # MAST-CloudNet
 
-An edge-to-cloud pipeline for live Aedes surveillance, using a Raspberry Pi for streaming and a cloud server for YOLOv11 inference.
+**MAST-CloudNet** is a distributed edge-to-cloud pipeline designed for real-time *Aedes* mosquito surveillance. It utilizes a Raspberry Pi (Edge) for intelligent video streaming and a centralized Debian server (Cloud) for YOLOv11-based inference, tracking, and analytics.
 
 <div align="center">
   <img src="./assets/interface.jpg" alt="MAST-CloudNet User Interface" width="300"/>
 </div>
-
-## Overview
-
-MAST-CloudNet is a distributed system designed for real-time mosquito surveillance, specifically targeting Aedes species. The project implements an edge-to-cloud architecture that combines:
-
-- **Edge Computing**: Raspberry Pi devices for local data capture and streaming
-- **Cloud Processing**: Server-side YOLOv11 model inference for mosquito detection and identification
-- **Real-time Pipeline**: Live streaming capabilities for continuous surveillance
-
-## Architecture
-
-The system follows a two-tier architecture:
-
-### Edge Layer (Raspberry Pi)
-- Captures video/image data from surveillance cameras
-- Handles local preprocessing and streaming
-- Maintains low-latency data transmission to cloud servers
-
-### Cloud Layer (Server)
-- Receives streaming data from edge devices
-- Performs YOLOv11-based object detection and classification
-- Processes mosquito identification and surveillance analytics
-
 ## Key Features
 
-- **Real-time Surveillance**: Live monitoring of Aedes mosquito populations
-- **Edge-to-Cloud Processing**: Distributed computing for optimal performance
-- **YOLOv11 Integration**: State-of-the-art object detection for accurate mosquito identification
-- **Scalable Architecture**: Support for multiple Raspberry Pi edge nodes
-- **Live Streaming**: Real-time data transmission and processing
-- **Web Dashboard**: User-friendly interface for monitoring and data export
-- **Detection Logging**: Comprehensive logging and CSV export functionality
-
-## Prerequisites
-
-### Server Requirements
-- Ubuntu/Debian Linux server (recommended)
-- Minimum 4 Cpu Cores
-- Python 3.8 or higher
-- GPU support recommended for YOLOv11 inference
-- Minimum 4GB RAM, 8GB+ recommended
-- Network connectivity for streaming
-
-### Edge Requirements
-- Raspberry Pi (Model 3B+, 4, 5, or Zero 2 W recommended).
-- Compatible camera module
-- Stable network connection
-- MicroSD card (32GB+ recommended)
-
-## Server Setup
-
-### 1. System Dependencies
-
-```bash
-# Update system packages
-sudo apt update && sudo apt upgrade -y
-
-# Install Python 3 and pip
-sudo apt install python3 python3-pip python3-venv -y
-
-# Install system dependencies for OpenCV
-sudo apt install libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1 -y
-```
-
-### 2. Clone Repository
-
-```bash
-# Clone the repository
-git clone https://github.com/MAST-CloudNet-Code/MAST-CloudNet.git
-cd MAST-CloudNet
-```
-
-### 3. Python Environment Setup
-
-```bash
-# Create virtual environment
-python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Install required Python packages
-pip install flask opencv-python ultralytics waitress numpy
-```
-
-### 4. Model Preparation
-
-```bash
-# Create models directory
-mkdir -p models
-
-# Place your trained YOLO model file (best.pt) in the models directory
-# The application expects the model at: models/best.pt
-```
-
-### 5. Configure Firewall
-
-```bash
-# Allow port 5000 through firewall (adjust port as needed)
-sudo ufw allow 5000/tcp
-```
-
-### 6. Run the Server
-
-#### Development Mode
-```bash
-# Basic run with default settings (port 5000, 1 worker)
-python app.py
-```
-
-#### Production Mode
-```bash
-# Run with custom configuration
-python app.py --port 8080 --workers 4
-
-# Available options:
-# --port: Port to run the web server on (default: 5000)
-# --workers: Number of worker threads to process frames (default: 1)
-```
-
-### 7. Verify Installation
-
-Once the server starts successfully, you should see:
-```
-INFO - Successfully loaded YOLO model
-INFO - Starting web server on port 5000 with 1 worker threads
-INFO - Using Waitress production server
-```
-
-Access the web interface at: `http://your-server-ip:5000`
-
-## Production Deployment
-
-### Using systemd Service
-
-1. Create service file:
-```bash
-sudo nano /etc/systemd/system/mast-cloudnet.service
-```
-
-2. Add service configuration:
-```ini
-[Unit]
-Description=MAST CloudNet Mosquito Detection Server
-After=network.target
-
-[Service]
-Type=simple
-User=your-username
-WorkingDirectory=/path/to/MAST-CloudNet
-Environment=PATH=/path/to/MAST-CloudNet/venv/bin
-ExecStart=/path/to/MAST-CloudNet/venv/bin/python app.py --port 5000 --workers 4
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-3. Enable and start:
-```bash
-sudo systemctl enable mast-cloudnet.service
-sudo systemctl start mast-cloudnet.service
-sudo systemctl status mast-cloudnet.service
-```
-
-## Web Interface Features
-
-The web dashboard provides:
-
-- **Live Video Stream**: Real-time detection feed with bounding boxes
-- **Detection Counts**: Real-time counting of Aedes and Non-Aedes mosquitoes
-- **System Status**: Camera status and uptime monitoring
-- **Location Display**: GPS coordinates and map integration
-- **Data Export**: CSV export of detection logs
-- **Reset Functionality**: Counter reset capabilities
-
-## API Endpoints
-
-- `GET /`: Main dashboard interface
-- `GET /frame`: Current frame with detections (JSON)
-- `GET /count`: Current detection counts (JSON)
-- `GET /stats`: System statistics (JSON)
-- `GET /status`: System status (JSON)
-- `POST /reset_count`: Reset detection counters
-- `GET /export_counts`: Export detection data as CSV
-
-
-## Setup Raspberry Pi Streaming Client (Edge Layer)
-
-A robust, multi-threaded Python script designed to stream video from a Raspberry Pi (or any other machine with a camera) to a central server over the network. This client is optimized for long-running, unattended operation, making it ideal for MAST-CloudNet's *Aedes* surveillance.
-
-### Installation (Raspberry Pi)
-
-1.  **Access your Raspberry Pi's Terminal**
-
-
-2.  **Enable the Camera (if using a Pi Camera Module)**
-    ```bash
-    sudo raspi-config
-    ```
-    Navigate to `Interface Options` -> `Legacy Camera` -> `Yes`, then save and reboot.
-
-
-3.  **Clone the Repository & setup a Python virtual environment**
-    Follow the instructions from the [server section of this guide](#clone-repository) 
-
-
-5.  **Install Dependencies**
-    Create a `requirements.txt` file with the following content:
-    ```
-    opencv-python-headless
-    requests
-    ```
-    Then, install the requirements:
-    ```bash
-    pip install -r requirements.txt
-    ```
+* **Real-time Inference**: YOLOv11 integration for high-accuracy detection of *Aedes* vs. *Non-Aedes* mosquitoes.
+* **Robust Object Tracking**: Implements ByteTrack for consistent ID assignment and counting.
+* **Edge-Optimized Streaming**: Custom threaded client (`edge_stream.py`) with LIFO queuing and latency tracking to ensure fresh frames over unstable networks.
+* **Performance Analytics**: Detailed logging of network latency, queue wait times, and inference speeds.
+* **Data Management**: One-click export for detection counts (CSV) and full system logs (ZIP).
+* **Production Ready**: Designed for deployment with Gunicorn and Nginx.
 
 ---
 
-## Run the script
+## System Architecture
 
-The script is configured via command-line arguments.
+1.  **Edge Layer (Raspberry Pi)**:
+    * Captures video via OpenCV or PiCamera2.
+    * Tags frames with precise edge timestamps.
+    * Streams frames to the cloud server via HTTP POST.
+2.  **Cloud Layer (Debian Server)**:
+    * Receives frames and calculates network latency.
+    * Processes frames using YOLOv11.
+    * Updates the live dashboard and maintains track histories.
+    * Logs performance metrics asynchronously to avoid blocking inference.
 
-| Argument          | Description                                                    | Default                  |
-| ----------------- | -------------------------------------------------------------- | ------------------------ |
-| `--camera`        | Camera index (`0`, `1`...)                                     | `0`                      |
-| `--image`         | Path to a static image file for testing the script             | `None`                   |
-| `--server`        | Full URL of the server's receiving endpoint.                   | `http://localhost:5000`  |
-| `--fps`           | The maximum frames per second to capture.                      | `15`                     |
-| `--retry`         | Seconds to wait between connection retry attempts.             | `5`                      |
-| `--no-verify-ssl` | Disable SSL certificate verification for HTTPS connections.    | `False`                  |
+---
 
+## 1. Server Setup (Cloud/Central Node)
 
-Make sure your virtual environment is active (`source venv/bin/activate`).
+### Prerequisites
+* **OS**: Debian 11/12/13 or Ubuntu 20.04/22.04 LTS.
+* **Hardware**: Minimum 8 CPU Cores, 8GB RAM (GPU recommended for higher FPS).
+* **Network**: Public Static IP of the server and high speed WiFi accessible by the Edge device.
+
+### Installation
+
+1.  **Update System & Install Dependencies**
+    ```bash
+    sudo apt update && sudo apt upgrade -y
+    sudo apt install python3 python3-pip python3-venv libgl1-mesa-glx libglib2.0-0 -y
+    ```
+
+2.  **Clone Repository**
+    ```bash
+    git clone [https://github.com/MAST-CloudNet-Code/MAST-CloudNet.git](https://github.com/MAST-CloudNet-Code/MAST-CloudNet.git)
+    cd MAST-CloudNet
+    ```
+
+3.  **Environment Setup**
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    
+    # Install core dependencies
+    pip install flask opencv-python ultralytics numpy waitress gunicorn
+    ```
+
+4.  **Model Setup**
+    Place your trained YOLO model (`best.pt`) in the `models/` directory:
+    ```bash
+    mkdir -p models
+    # Ensure models/best.pt exists
+    ```
+
+### Running Locally (Development)
+You can run the server directly using the built-in Waitress server:
 ```bash
-# Stream from the default Pi Camera to a server at 192.168.1.100
-python edge_stream.py --camera 0 --server [http://192.168.1.100:5000](http://192.168.1.100:5000) --fps 20
+python app.py --port 5000
+
 ```
 
-## Run as a Systemd Service (Recommended)
-To ensure the client runs automatically on boot and restarts if it fails, [set it up as a systemd service](#using-systemd-service).
+Access the dashboard at `http://<server-ip>:5000`.
 
+---
+
+## 2. Production Deployment Guide (Gunicorn + Nginx)
+
+For a robust, persistent deployment on a Debian server, we use **Gunicorn** as the WSGI application server and **Nginx** as the reverse proxy.
+
+### Step 1: Configure Gunicorn Systemd Service
+
+Create a system service to keep the application running in the background and restart it on failure.
+
+1. Create the service file:
+```bash
+sudo nano /etc/systemd/system/mast-cloudnet.service
+
+```
+
+
+2. Paste the following configuration (adjust paths and username accordingly):
+```ini
+[Unit]
+Description=MAST-CloudNet Gunicorn Instance
+After=network.target
+
+[Service]
+User=your_username
+Group=www-data
+WorkingDirectory=/home/your_username/MAST-CloudNet
+Environment="PATH=/home/your_username/MAST-CloudNet/venv/bin"
+# Run Gunicorn with 4 workers, binding to a local unix socket for speed
+ExecStart=/home/your_username/MAST-CloudNet/venv/bin/gunicorn --workers 4 --bind unix:mast-cloudnet.sock -m 007 app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+
+3. Start and enable the service:
+```bash
+sudo systemctl start mast-cloudnet
+sudo systemctl enable mast-cloudnet
+sudo systemctl status mast-cloudnet
+
+```
+
+
+
+### Step 2: Configure Nginx Reverse Proxy
+
+Nginx will handle incoming HTTP requests and forward them to Gunicorn.
+
+1. Install Nginx:
+```bash
+sudo apt install nginx -y
+
+```
+
+
+2. Create a new server block config:
+```bash
+sudo nano /etc/nginx/sites-available/mast-cloudnet
+
+```
+
+
+3. Add the following configuration. **Note the `client_max_body_size` directive**, which is critical for allowing image uploads from the edge device.
+```nginx
+server {
+    listen 80;
+    server_name your_server_ip_or_domain;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/your_username/MAST-CloudNet/mast-cloudnet.sock;
+    }
+
+    # Crucial for receiving image frames via POST
+    client_max_body_size 10M;
+}
+
+```
+
+
+4. Enable the site and restart Nginx:
+```bash
+sudo ln -s /etc/nginx/sites-available/mast-cloudnet /etc/nginx/sites-enabled
+sudo nginx -t  # Test configuration for errors
+sudo systemctl restart nginx
+
+```
+
+
+
+### Step 3: Firewall
+
+Ensure traffic is allowed on Port 80 (HTTP):
+
+```bash
+sudo ufw allow 'Nginx Full'
+
+```
+
+Your server is now live at `http://your_server_ip`.
+
+---
+
+## 3. Edge Setup (Raspberry Pi Client)
+
+The `edge_stream.py` script captures video and streams it to the server. It is resilient to network drops and manages frame buffering.
+
+### Installation
+
+1. Clone this repo on the Raspberry Pi.
+2. Install dependencies:
+```bash
+pip install opencv-python-headless requests numpy
+
+```
+
+
+
+### Usage
+
+Run the streamer, pointing it to your deployed server's `/receive_frame` endpoint.
+
+**If using Nginx (Port 80):**
+
+```bash
+python edge_stream.py --camera 0 --server http://<server-ip> --fps 5
+
+```
+
+**If using Dev Server (Port 5000):**
+
+```bash
+python edge_stream.py --camera 0 --server http://<server-ip>:5000 --fps 5
+
+```
+
+**Command Line Arguments:**
+| Argument | Default | Description |
+| :--- | :--- | :--- |
+| `--camera` | `0` | Camera index (or `/dev/video0`) |
+| `--server` | `localhost:5000` | Base URL of the cloud server |
+| `--fps` | `5.0` | Target capture framerate |
+| `--picam` | `False` | Use `libcamera` (PiCamera2) instead of OpenCV |
+| `--image` | `None` | Path to a static image (for debugging) |
+
+---
+
+## API Documentation
+
+The server exposes the following endpoints:
+
+* **`GET /`**: Renders the main dashboard.
+* **`POST /receive_frame`**: Accepts raw image bytes. Requires headers `X-Timestamp` and `X-Frame-ID`. Returns calculated network latency.
+* **`GET /frame`**: Returns the latest processed frame (JPEG).
+* **`GET /stats`**: Returns JSON object containing FPS, latency metrics, and detection counts.
+* **`POST /reset`**: Resets tracking IDs, counters, and logs.
+* **`GET /export_counts`**: Downloads a CSV of current detection counts.
+* **`GET /export_logs`**: Downloads a ZIP file containing `server_performance_log.csv` and `experiment_log.txt`.
+
+---
 
 ## Troubleshooting
 
-### Common Issues
+1. **"413 Request Entity Too Large"**:
+* This means Nginx is blocking the image upload. Ensure `client_max_body_size 10M;` is set in your Nginx config.
 
-1. **Model not found**: Ensure `best.pt` is placed in the `models/` directory
-2. **OpenCV issues**: Install system dependencies as shown in setup
-3. **Port access**: Check firewall settings and port availability
-4. **Camera connection**: Verify camera hardware and drivers
 
-### Logs
+2. **Stream Lag**:
+* Reduce the `--fps` on the edge device.
+* Ensure the server has enough workers.
 
-- Application logs: `server.log`
-- Experiment logs: `experiment_log.txt`
-- System logs: `journalctl -u mast-cloudnet.service -f`
+
+3. **Logs**:
+* Check Gunicorn logs: `journalctl -u mast-cloudnet -f`
+* Check Nginx error logs: `sudo tail -f /var/log/nginx/error.log`
+
+
 
 ## Contact
 
 For questions or collaboration opportunities, please reach out through GitHub issues or contact the https://du-eee-micronanolab.com/
 
----
